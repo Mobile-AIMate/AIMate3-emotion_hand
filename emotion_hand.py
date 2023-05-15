@@ -10,6 +10,8 @@ import time
 import traceback
 from datetime import datetime
 import mediapipe as mp
+import os
+import sys
 
 server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -19,6 +21,11 @@ port = 8888
 server_socket.bind((host, port))
 
 server_socket.listen(1)
+
+# 检查模型是否被下载
+if not os.path.isfile("shape_predictor_68_face_landmarks.dat"):
+    print("请查看README.md文件进行手动下载")
+    raise FileNotFoundError("shape_predictor_68_face_landmarks.dat")
 
 # 线程安全队列
 request_queue = queue.Queue()
@@ -38,6 +45,7 @@ https://pan.baidu.com/s/1oMDX4mzrwqBm9a55zSdERA?pwd=k1bp
 mpHands = mp.solutions.hands
 hands = mpHands.Hands()
 mpDraw = mp.solutions.drawing_utils
+
 
 
 # 直接打开摄像头进行拍摄获取图像并分别进行处理
