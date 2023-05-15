@@ -29,6 +29,11 @@ detector = dlib.get_frontal_face_detector()
 # dlib 的68点模型，使用官方训练好的特征预测器
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
+'''
+This .dat file can be downloaded at:
+https://pan.baidu.com/s/1oMDX4mzrwqBm9a55zSdERA?pwd=k1bp 
+'''
+
 # 定义手，检测对象
 mpHands = mp.solutions.hands
 hands = mpHands.Hands()
@@ -38,27 +43,27 @@ mpDraw = mp.solutions.drawing_utils
 # 直接打开摄像头进行拍摄获取图像并分别进行处理
 def create_data():
     cap = cv2.VideoCapture(0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
-    cap.set(cv2.CAP_PROP_FPS, 10)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+    cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
+
+    i = 0
+
     while True:
+
+        i += 1
 
         issuccess, frame = cap.read()
         if not issuccess:
             continue
 
-        emotion_data = create_emotion_data(img = frame)
+        if i % 2:
+            print(i)
+            emotion_data = create_emotion_data(img = frame)
         hand_data = create_hand_data(img = frame)
 
         data = [emotion_data, hand_data]
         data_queue.put(data)
-
-    # while 打开摄像头：
-        # img = get_img()
-        # emotion_data = emotion(img) 字典
-        # hand_data = hand(img) 字典
-        # data = [emotion_data, hand_data]
-        # data_queue.put(data)
 
 def create_emotion_data(img):
 
@@ -121,21 +126,18 @@ def create_emotion_data(img):
                 if round(mouth_height >= 0.04):
                     if eye_hight >= 0.036:
                         emo_label = "amazing"
-                        print("amazing")
                     else:
                         emo_label = "happy"
-                        print("happy")
                         
                 # 没有张嘴，可能是正常和生气，通过眉毛区分
                 else:
                     if brow_k <= 0.29:
                         emo_label = "sad"
-                        print("sad")
                     else:
                         emo_label = "nature"
-                        print("nature")
-                face_position = [int(d.left()),int(d.bottom()),int(d.right()),int(d.top())]
+                face_position = [int(d.left()), int(d.bottom()), int(d.right()), int(d.top())]
                 emotion_data = {'emotion_label':emo_label, 'face_position':face_position}
+                print(emotion_data)
                 
     else:
         emotion_data = {'emotion_label': "", 'face_position': []}
